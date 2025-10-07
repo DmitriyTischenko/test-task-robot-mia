@@ -212,18 +212,15 @@
 </div>
 
 <script>
-    // Analytics Dashboard - Simplified JavaScript
     console.log('Analytics dashboard initialized');
 
-    // Global variables
     let heatmapChart = null;
     let hourlyChart = null;
     let currentClicks = [];
     let currentPage = 1;
     let lastPage = 1;
-    const perPage = 10; // Match the default from the backend
+    const perPage = 10;
 
-    // DOM Elements
     const elements = {
         heatmapOverlay: document.getElementById('heatmapOverlay'),
         websiteScreenshot: document.getElementById('website-screenshot'),
@@ -242,7 +239,6 @@
         lastPageDisplay: document.getElementById('last-page-display')
     };
 
-    // Initialize dashboard
     document.addEventListener('DOMContentLoaded', function() {
         console.log('DOM loaded, initializing analytics...');
         initializeDashboard();
@@ -252,13 +248,12 @@
         try {
             showLoadingStates();
 
-            // Load all data in parallel, including initial recent clicks
             await Promise.all([
                 loadScreenshot(),
                 loadHeatmapData(),
                 loadHourlyStats(),
                 loadAdditionalStats(),
-                loadRecentClicks(currentPage) // Load first page initially
+                loadRecentClicks(currentPage)
             ]);
 
             console.log('All analytics data loaded successfully');
@@ -269,19 +264,16 @@
         }
     }
 
-    // Screenshot Management
     async function loadScreenshot() {
         if (!elements.websiteScreenshot) return;
 
         const screenshotUrl = elements.websiteScreenshot.src;
 
         if (!screenshotUrl || screenshotUrl === window.location.href) {
-            // No screenshot available
             showScreenshotFallback();
             return;
         }
 
-        // Wait for screenshot to load
         return new Promise((resolve) => {
             elements.websiteScreenshot.onload = () => {
                 console.log('Screenshot loaded successfully');
@@ -292,12 +284,10 @@
             elements.websiteScreenshot.onerror = () => {
                 console.error('Failed to load screenshot');
                 elements.screenshotError.classList.remove('hidden');
-                // Initialize with fallback
                 initializeHeatmapCanvas();
                 resolve();
             };
 
-            // If already loaded
             if (elements.websiteScreenshot.complete) {
                 initializeHeatmapCanvas();
                 resolve();
@@ -324,14 +314,12 @@
         initializeHeatmapCanvas();
     }
 
-    // Heatmap Functions
     function initializeHeatmapCanvas() {
         if (!elements.heatmapOverlay) return;
 
         const container = elements.heatmapOverlay.parentElement;
         if (!container) return;
 
-        // Set canvas size to match container
         elements.heatmapOverlay.width = container.clientWidth;
         elements.heatmapOverlay.height = container.clientHeight;
 
@@ -375,15 +363,12 @@
         const width = elements.heatmapOverlay.width;
         const height = elements.heatmapOverlay.height;
 
-        // Clear canvas
         ctx.clearRect(0, 0, width, height);
 
         if (clicks.length === 0) return;
 
-        // Create heatmap data structure
         const heatmapData = createHeatmapData(clicks, width, height);
 
-        // Draw heatmap
         drawHeatmapGradient(ctx, heatmapData, width, height);
 
         console.log('Heatmap drawn successfully');
@@ -393,7 +378,6 @@
         const data = new Array(width * height).fill(0);
         let maxIntensity = 0;
 
-        // Get screenshot position for coordinate mapping
         const screenshot = elements.websiteScreenshot;
         const container = elements.heatmapOverlay.parentElement;
 
@@ -403,7 +387,6 @@
             const screenshotRect = screenshot.getBoundingClientRect();
             const containerRect = container.getBoundingClientRect();
 
-            // Calculate scaling and offset
             scaleX = screenshotRect.width / width;
             scaleY = screenshotRect.height / height;
             offsetX = (screenshotRect.left - containerRect.left) / scaleX;
@@ -411,24 +394,19 @@
         }
 
         clicks.forEach(click => {
-            // Convert click coordinates to canvas coordinates
             let canvasX, canvasY;
 
             if (screenshot && screenshot.complete) {
-                // Map to screenshot position
                 canvasX = (click.x / click.viewport_width) * (width * scaleX) + offsetX;
                 canvasY = (click.y / click.viewport_height) * (height * scaleY) + offsetY;
             } else {
-                // Fallback: distribute evenly
                 canvasX = (click.x / click.viewport_width) * width;
                 canvasY = (click.y / click.viewport_height) * height;
             }
 
-            // Ensure coordinates are within bounds
             canvasX = Math.max(0, Math.min(width - 1, canvasX));
             canvasY = Math.max(0, Math.min(height - 1, canvasY));
 
-            // Add heat around the point
             const radius = 12;
             for (let i = -radius; i <= radius; i++) {
                 for (let j = -radius; j <= radius; j++) {
@@ -451,8 +429,6 @@
 
     function drawHeatmapGradient(ctx, heatmapData, width, height) {
         const { data, maxIntensity } = heatmapData;
-
-        // Create gradient image
         const imageData = ctx.createImageData(width, height);
 
         for (let i = 0; i < data.length; i++) {
@@ -471,7 +447,6 @@
 
         ctx.putImageData(imageData, 0, 0);
 
-        // Add blur effect for smooth appearance
         ctx.filter = 'blur(8px)';
         ctx.globalCompositeOperation = 'lighter';
         ctx.drawImage(ctx.canvas, 0, 0);
@@ -480,25 +455,21 @@
     }
 
     function getHeatmapColor(intensity) {
-        // Color gradient from blue (cold) to red (hot)
         let r, g, b, a;
 
         if (intensity < 0.3) {
-            // Blue to cyan
             const t = intensity / 0.3;
             r = Math.round(0 * t);
             g = Math.round(150 * t);
             b = Math.round(255 * (1 - t * 0.5));
             a = Math.round(150 * t);
         } else if (intensity < 0.6) {
-            // Cyan to yellow
             const t = (intensity - 0.3) / 0.3;
             r = Math.round(255 * t);
             g = Math.round(255 * (0.8 - t * 0.3));
             b = Math.round(100 * (1 - t));
             a = Math.round(180 + 75 * t);
         } else {
-            // Yellow to red
             const t = (intensity - 0.6) / 0.4;
             r = 255;
             g = Math.round(255 * (1 - t * 0.7));
@@ -509,7 +480,6 @@
         return [r, g, b, a];
     }
 
-    // Hourly Chart Functions
     async function loadHourlyStats() {
         try {
             showElement(elements.chartLoading);
@@ -540,12 +510,10 @@
     function drawHourlyChart(stats) {
         const ctx = document.getElementById('hourlyChart').getContext('2d');
 
-        // Destroy existing chart
         if (hourlyChart) {
             hourlyChart.destroy();
         }
 
-        // Prepare data
         const hourlyData = Array(24).fill(0);
         const labels = Array.from({length: 24}, (_, i) => {
             if (i === 0) return '12AM';
@@ -560,7 +528,6 @@
             }
         });
 
-        // Create chart
         hourlyChart = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -613,7 +580,6 @@
                         ticks: {
                             maxRotation: 0,
                             callback: function(value, index) {
-                                // Show only every 3 hours to avoid crowding
                                 return index % 3 === 0 ? this.getLabelForValue(value) : '';
                             }
                         },
@@ -650,7 +616,6 @@
         ctx.fillText(message, canvas.width / 2, canvas.height / 2);
     }
 
-    // Additional Stats Functions
     async function loadAdditionalStats() {
         try {
             const [todayResponse, weekResponse] = await Promise.all([
@@ -671,13 +636,10 @@
         }
     }
 
-    // Recent Clicks Functions with Pagination
     async function loadRecentClicks(page = 1) {
         try {
-            // Show pagination loading indicator
             showElement(elements.paginationLoading);
 
-            // Update current page state
             currentPage = page;
 
             const response = await fetch(`/api/websites/{{ $website->id }}/recent-clicks?page=${page}&per_page=${perPage}`);
@@ -690,11 +652,9 @@
             const clicks = result.data || [];
             const meta = result.meta || { current_page: 1, last_page: 1, total: 0, per_page: perPage };
 
-            // Update pagination state
             currentPage = meta.current_page;
             lastPage = meta.last_page;
 
-            // Update UI
             updatePaginationUI();
             displayRecentClicks(clicks);
 
@@ -702,7 +662,6 @@
             console.error('Error loading recent clicks:', error);
             displayRecentClicksError();
         } finally {
-            // Hide pagination loading indicator
             hideElement(elements.paginationLoading);
         }
     }
@@ -761,7 +720,6 @@
         if (elements.nextButton) elements.nextButton.disabled = currentPage >= lastPage;
     }
 
-    // Event Listeners for Pagination
     if (elements.prevButton) {
         elements.prevButton.addEventListener('click', () => {
             if (currentPage > 1) {
@@ -778,8 +736,6 @@
         });
     }
 
-
-    // Utility Functions
     function formatTime(timestamp) {
         const date = new Date(timestamp);
         return date.toLocaleTimeString('en-US', {

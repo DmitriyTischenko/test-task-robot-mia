@@ -85,10 +85,7 @@
 </div>
 
 <script>
-    // This would typically be populated after form submission
-    // For now, it's a placeholder
     document.addEventListener('DOMContentLoaded', function() {
-        // In a real application, you'd get the tracking ID after form submission
         console.log('After form submission, the tracking ID will appear here');
     });
 </script>
