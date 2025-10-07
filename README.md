@@ -91,3 +91,5 @@ docker-compose up -d --build
 After completing the setup, you can access the Laravel application in your web browser at:
 
 [http://localhost:8080](http://localhost:8080)
+
+To test click tracking, copy click-tracker.js to another locale project.
