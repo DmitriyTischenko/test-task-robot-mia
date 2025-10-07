@@ -17,7 +17,7 @@ Before starting, ensure you have the following installed on your machine:
    ```bash
    cd .docker
 
-2. Copy the example environment file:
+2. Copy the example environment file for the docker:
     ```
     cp .env.example .env
 
@@ -27,13 +27,30 @@ Before starting, ensure you have the following installed on your machine:
 
 5. Replace their values with your user ID and group ID. You can find these by running the id command in your terminal.
 
+6. And the example environment file for the project:
+    ```
+   cd ../
+   cp .env.example .env
+
 ### 2. Configure Database Settings
 
 Open the main project .env file (not the one in the .docker directory). Ensure the database connection settings match the Docker Compose configuration:
 
+DB_CONNECTION=mysql
+
+DB_HOST=robot-mysql
+
+DB_PORT=3306
+
+DB_DATABASE=robot
+
+DB_USERNAME=robot
+
+DB_PASSWORD=robot
+
 ### 3. Build and Start Services
 
-Run the following command from the project root (where your main docker-compose.yml file is located):
+Run the following command from the project root (where your main docker-compose.yml file is located (.docker)):
 ``` 
 docker-compose up -d --build
 ```
